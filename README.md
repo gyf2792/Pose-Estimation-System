@@ -45,10 +45,21 @@
 ```txt
 torch==2.4.0+cu118
 torchvision==0.19.0+cu118
+torchaudio==2.4.0+cu118
 opencv-python==4.10.0.84
 numpy==1.26.4
 timm==1.0.24
 albumentations==2.0.8
+Pillow==11.3.0
+roboflow==1.2.15
+scipy==1.13.1
+pandas>=2.0.0
+matplotlib==3.9.4
+seaborn==0.13.2
+PyYAML==6.0.3
+pydantic==2.12.5
+tqdm==4.67.3
+requests==2.32.5
 ```
 
 ## 4. 全局参数配置
