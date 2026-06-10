@@ -1,43 +1,43 @@
- 基于视觉的雷达阵面指向测量系统 (Vision-based Pose Estimation System)
+# 基于视觉的雷达阵面指向测量系统 (Vision-based Pose Estimation System)
 
 本项目是一个融合双目视觉与深度学习的6自由度(6-DoF)位姿估计系统。
 系统具备多层级故障回退机制，能够在光照突变、目标遮挡或单侧硬件异常等复杂工况下，维持空间位姿解算与时序连续性。
 
-1. 系统架构
+## 1. 系统架构
 本系统拥有以下核心模块：
-I/O与物理映射层 (io_manager.py)：负责加载双目相机的内外参矩阵及畸变系数，对实时视频流进行去畸变与双目极线校正(StereoRectify)。
-主控调度层 (main.py)：控制视频流处理循环，调度多线程任务，并基于各感知管线的反馈实时切换系统状态机。
-特征提取层 (algorithms/)：
- traditional_detector.py：基于几何拓扑的传统视觉检测器，利用自适应二值化、轮廓提取及亮度跳变检验进行高精度特征定位。
- ai_detector.py：基于MobileNetV3的深度学习检测器，结合三级反卷积上采样头与二维泰勒展开，实现关键点的亚像素级特征提取。
-空间解算层 (algorithms/)：
- pose_solver.py：单目PnP解算器（cv2.SOLVEPNP_IPPE）。
- stereo_solver.py：双目立体视觉位姿解算与深度三角剖分。
-核心处理模块 (core/)：包含二维卡尔曼目标跟踪(tracker.py)、数据滤波平滑(filters.py)以及基于物理先验的刚体运动学补全(hallucinator.py)。
 
-2. 核心运行模式 (状态机)
+* **I/O与物理映射层 (io_manager.py)**：负责加载双目相机的内外参矩阵及畸变系数，对实时视频流进行去畸变与双目极线校正(StereoRectify)。
+* **主控调度层 (main.py)**：控制视频流处理循环，调度多线程任务，并基于各感知管线的反馈实时切换系统状态机。
+* **特征提取层 (algorithms/)**：
+  * `traditional_detector.py`：基于几何拓扑的传统视觉检测器，利用自适应二值化、轮廓提取及亮度跳变检验进行高精度特征定位。
+  * `ai_detector.py`：基于MobileNetV3的深度学习检测器，结合三级反卷积上采样头与二维泰勒展开，实现关键点的亚像素级特征提取。
+* **空间解算层 (algorithms/)**：
+  * `pose_solver.py`：单目PnP解算器（cv2.SOLVEPNP_IPPE）。
+  * `stereo_solver.py`：双目立体视觉位姿解算与深度三角剖分。
+* **核心处理模块 (core/)**：包含二维卡尔曼目标跟踪(tracker.py)、数据滤波平滑(filters.py)以及基于物理先验的刚体运动学补全(hallucinator.py)。
+
+## 2. 核心运行模式 (状态机)
 系统内置三种自适应工作模式，以应对不同类型的突发情况：
 
-MODE 1: NORMAL (常规模式)：系统默认模式。左右相机利用传统视觉算法稳定提取特征点，进行高精度双目解算。
-MODE 2: FALLBACK (回退模式)：当传统算法出现连续掉帧（默认15帧）时触发。
-主控程序暂停传统检测，读取异步神经网络线程（基于MobileNetV3）在共享内存中生成的关键点数据，继续完成双目解算。
-MODE 3: EXTREME (极端模式)：当单侧相机断流或目标长时间丢失（默认30帧）时触发。
-系统切断立体匹配，依赖单目关键点检测与PnP解算，并依据先验靶标尺寸启动刚体补全模块(RigidBodyHallucinator)修复被遮挡的物理点，维持位姿流的时序连续性。
+* **MODE 1: NORMAL (常规模式)**：系统默认模式。左右相机利用传统视觉算法稳定提取特征点，进行高精度双目解算。
+* **MODE 2: FALLBACK (回退模式)**：当传统算法出现连续掉帧（默认15帧）时触发。主控程序暂停传统检测，读取异步神经网络线程（基于MobileNetV3）在共享内存中生成的关键点数据，继续完成双目解算。
+* **MODE 3: EXTREME (极端模式)**：当单侧相机断流或目标长时间丢失（默认30帧）时触发。系统切断立体匹配，依赖单目关键点检测与PnP解算，并依据先验靶标尺寸启动刚体补全模块(RigidBodyHallucinator)修复被遮挡的物理点，维持位姿流的时序连续性。
 
- 3. 运行环境配置
+## 3. 运行环境配置
 系统已在以下硬件与软件环境中完成测试与验证：
 
-硬件环境
-测试设备: Dell Inspiron 7610
-GPU: NVIDIA GeForce RTX 3060 Laptop GPU (6 GB)
+### 硬件环境
+* 测试设备: Dell Inspiron 7610
+* GPU: NVIDIA GeForce RTX 3060 Laptop GPU (6 GB)
 
-软件环境
- 操作系统: Windows
- Python 版本: 3.9
- CUDA Toolkit: 11.8
+### 软件环境
+* 操作系统: Windows
+* Python 版本: 3.9
+* CUDA Toolkit: 11.8
 
-核心依赖库
+### 核心依赖库
 可参照以下版本要求安装依赖环境：
+```text
 torch==2.4.0+cu118
 torchvision==0.19.0+cu118
 opencv-python==4.10.0.84
