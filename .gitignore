@@ -1,0 +1,19 @@
+# IDE 配置文件 (PyCharm/VSCode)
+.idea/
+*.iml
+*.xml
+inspectionProfiles/
+.vscode/
+
+# Python 编译文件
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 虚拟环境 (如果有的话)
+venv/
+env/
+
+# 日志与临时数据
+*.log
+pose_log_*.csv
